@@ -5,44 +5,67 @@ import csv
 #read the CSV files
 csvpath = os.path.join('Resources', 'budget_data.csv')
 
+#define variables, start w zero for future adding of profit
+total = 0
+month = 0
+previousprofit = 0
+changemonth = 0
+changetotal = 0
+greatincmonth = ""
+greatincreasechange = 0
+greatdecmonth = ""
+greatdecreasechange = 0
+
+#csvreader is opening the file and pointing to first row
 with open(csvpath) as csvfile:
     csvreader = csv.reader(csvfile, delimiter=',')
-    print(csvreader)
 
-#read the headers, skip and print
+
+#read the headers, skip (moving pointer to next row) and print
+#dont need to print
     csv_header = next(csvreader)
     print(f"CSV Header: {csv_header}")
 
 #read the rows after header
+#print the 2nd row
     for row in csvreader:
-        print(row)
+        #convert to integer/currently string
+        total = total + int(row[1])
+        month = month + 1
 
-        rowcount=0
-#total number of months (without header)
-    for row in csvreader:
-        rowcount = (rowcount + 1)
-         print("Total months: ", rowcount)
+        currentprofit = int(row[1]) 
+        change = 0
 
-#Total the net profit/loss
-    total = sum(row[1],start=0)
-    print("Total: ", total)
+        if previousprofit != 0:
+            change = currentprofit - previousprofit 
+            changemonth = changemonth + 1 
+            changetotal = changetotal + change
 
-#Changes of Profit/Losses & Average
-   #loop through data
-   #row1[column1]=i
-   #i=0
-   #(sum i + (i+1))
-   # Differences = save that somewhere...
-   #loop through and then 
-   # Find Mean = Differences/rowcount
- 
+        previousprofit = currentprofit 
 
-#Greatest Increase
-    #look through Differences
-    #highest row = highest float
-    #print (#Greatest Increase in Profits: " highestrow)
+        if change > greatincreasechange:
+            greatincmonth = row[0]
+            greatincreasechange = change
 
-#Greatest Decrease
-    #look through differences
-    # lowestrow = smallest float
-    #print ("Greatest Decrease in Profits: ", lowestrow)
+        if change < greatdecreasechange:
+            greatdecmonth = row[0]
+            greatdecreasechange = change
+
+
+print(total)
+print(month)
+
+output = f"""
+Financial Analysis
+----------------------------
+Total Months: {month}
+Total: ${total}
+Average Change: ${changetotal/changemonth:.2f}
+Greatest Increase in Profits: {greatincmonth} (${greatincreasechange})
+Greatest Decrease in Profits: {greatdecmonth} (${greatdecreasechange})
+"""
+
+print(output)
+#use the w to write or default is read
+with open("Analysis/pybank.txt", "w") as outfile:
+    outfile.write(output)
